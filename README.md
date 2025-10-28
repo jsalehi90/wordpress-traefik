@@ -23,13 +23,10 @@ A production-ready, secure, and maintainable setup for running WordPress behind 
 ## 📁 Project Structure
 
 wordpress-traefik/
-├── docker-compose.yml           # Main config
-├── .env                         # Secrets & versions (NOT committed!)
-├── .env.example                 # Template for users
-├── traefik/
-│   └── acme.json                # Let's Encrypt certs (chmod 600)
-├── README.md                    # Project documentation
-└── .gitignore                   # Ignore sensitive files
+├── docker-compose.yml
+├── .env.example
+├── README.md
+└── .gitignore
 
 ---
 
