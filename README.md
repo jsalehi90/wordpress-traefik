@@ -21,13 +21,13 @@ A production-ready, secure, and maintainable setup for running WordPress behind 
 ---
 
 ## 📁 Project Structure
-
+```
 wordpress-traefik
 ├── docker-compose.yml
 ├── .env.example
 ├── .gitignore
 └── README.md
-
+```
 ---
 
 ## 🛠️ Setup Instructions
