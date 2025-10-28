@@ -2,12 +2,6 @@
 
 A production-ready, secure, and maintainable setup for running WordPress behind Traefik with automatic Let’s Encrypt SSL certificates.
 
-✅ No manual port mapping  
-✅ Auto-renewing SSL via Let’s Encrypt  
-✅ Secrets stored in `.env` (never committed)  
-✅ Traefik dashboard protected with Basic Auth  
-✅ Uses Docker Compose v3.8 + external network
-
 ---
 
 ## 🚀 Features
