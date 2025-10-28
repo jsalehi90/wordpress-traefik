@@ -1,0 +1,90 @@
+networks:
+  web_net:
+    external: true
+    name: web_net
+
+volumes:
+  wp_db:
+    name: wp_db
+  wp_wp:
+    name: wp_wp
+  traefik-acme:
+    name: traefik-acme
+
+services:
+  db:
+    image: ${MYSQL_IMAGE}
+    container_name: mysql
+    volumes:
+      - wp_db:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - web_net
+
+  wordpress:
+    image: ${WORDPRESS_IMAGE}
+    container_name: wordpress
+    volumes:
+      - wp_wp:/var/www/html/
+    depends_on:
+      - db
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    networks:
+      - web_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.routers.wordpress.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.wordpress.entrypoints=https"
+      - "traefik.http.routers.wordpress.tls.certresolver=mycert"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+
+  traefik:
+    image: ${TRAEFIK_IMAGE}
+    restart: always
+    container_name: traefik
+    command:
+      - "--log.level=INFO"
+      - "--api.insecure=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=web_net"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--certificatesresolvers.mycert.acme.email=${TRAEFIK_EMAIL}"
+      - "--certificatesresolvers.mycert.acme.storage=/acme/acme.json"
+      - "--certificatesresolvers.mycert.acme.tlschallenge=true"
+      - "--providers.file.directory=/traefik"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/traefik
+      - traefik-acme:/acme
+    networks:
+      - web_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_DOMAIN}`)"
+      - "traefik.http.routers.traefik.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.web-auth.basicauth.users=${TRAEFIK_BASIC_AUTH_USER}:${TRAEFIK_BASIC_AUTH_PASS}"
+      - "traefik.http.routers.traefik-secure.middlewares=web-auth"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`${TRAEFIK_DOMAIN}`)"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=mycert"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
