@@ -15,6 +15,7 @@ A production-ready, secure, and maintainable setup for running WordPress behind 
 ---
 
 ## 📁 Project Structure
+
 ```
 wordpress-traefik
 ├── docker-compose.yml
@@ -22,6 +23,7 @@ wordpress-traefik
 ├── .gitignore
 └── README.md
 ```
+
 ---
 
 ## 🛠️ Setup Instructions
@@ -34,7 +36,7 @@ cd wordpress-traefik
 ```
 
 2. Create `.env` file
-Copy `.env.example` and fill in your secrets:
+   Copy `.env.example` and fill in your secrets:
 
 ```bash
 cp .env.example .env
@@ -54,11 +56,13 @@ mkdir -p traefik
 touch traefik/acme.json
 chmod 600 traefik/acme.json
 ```
+
 5. Start services
 
 ```bash
 docker compose up -d
 ```
+
 ---
 
 ## 🌐 Access Your Site
@@ -91,11 +95,13 @@ To generate a secure SHA-1 hash for your username/password, follow these steps:
 ### 1. Install `htpasswd` (if not installed)
 
 On Ubuntu/Debian:
+
 ```bash
 sudo apt update && sudo apt install apache2-utils -y
 ```
 
 On CentOS/RHEL/Fedora:
+
 ```bash
 sudo yum install httpd-tools -y
 # or
@@ -106,15 +112,16 @@ sudo dnf install httpd-tools -y
 
 ### 2. Generate the SHA-1 Hash
 
-Run this command to generate the hash (replace `DockerMe` and `yourpassword` with your own):
+Run this command to generate the hash (replace `admin` and `yourpassword` with your own):
 
 ```bash
-htpasswd -nb admin yourpassword | cut -d ":" -f 2
+echo yourpassword | htpasswd -s -n -i admin
 ```
 
 ✅ Example output:
+
 ```
-{SHA}Gt3+oW3VTjtIbz6hTTD1VuZDj1w=
+admin:{SHA}Gt3+oW3VTjtIbz6hTTD1VuZDj1w=
 ```
 
 > 📌 This is the value you should paste into your `.env` file under `TRAEFIK_BASIC_AUTH_PASS`.
